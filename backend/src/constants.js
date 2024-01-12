@@ -1,3 +1,2 @@
-const DB_NAME = "remindcents";
-
-export { DB_NAME };
+export const DB_NAME = "remindcents";
+export const LIMIT = "16kb";
