@@ -71,11 +71,12 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
-userSchema.isPasswordCorrect = async function (password) {
-  return await bcrypt.compare(this.password, password);
+userSchema.methods.isPasswordCorrect = async function (password) {
+  return await bcrypt.compare(password, this.password);
 };
 
-userSchema.generateAccessToken = () => {
+userSchema.methods.generateAccessToken = function () {
+  console.log("enter into model function access");
   return jwt.sign(
     {
       _id: this._id,
@@ -89,7 +90,8 @@ userSchema.generateAccessToken = () => {
   );
 };
 
-userSchema.generateRefreshToken = () => {
+userSchema.methods.generateRefreshToken = function () {
+  console.log("enter into model function refresh");
   return jwt.sign(
     {
       _id: this._id,
