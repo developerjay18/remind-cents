@@ -15,7 +15,9 @@ app.use(cookieParser());
 app.use(express.static("public"));
 
 import userRouter from "./routes/user.route.js";
+import lendedRouter from "./routes/lended.route.js";
 // setting routes
 app.use("/api/v1/users", userRouter);
+app.use("/api/v1/lended", lendedRouter);
 
 export default app;

@@ -15,8 +15,12 @@ const lendedSchema = new Schema(
       required: true,
     },
     whatsappNumber: {
+      type: String,
+      required: true,
+    },
+    owner: {
       type: Schema.Types.ObjectId,
-      ref: "Whatsapp",
+      ref: "User",
     },
   },
   { timestamps: true }

@@ -429,22 +429,31 @@ const getLendedData = asyncHandler(async (req, res) => {
     {
       $lookup: {
         from: "lendeds",
-        localField: "lendedTo",
-        foreignField: "_id",
+        localField: "_id",
+        foreignField: "owner",
         as: "lendedTo",
         pipeline: [
           {
             $lookup: {
-              from: "whatsapps",
-              localField: "whatsappNumber",
+              from: "users",
+              localField: "owner",
               foreignField: "_id",
-              as: "whatsappNumber",
+              as: "owner",
+              pipeline: [
+                {
+                  $project: {
+                    _id: 1,
+                    username: 1,
+                    whatsappNumber: 1,
+                  },
+                },
+              ],
             },
           },
           {
             $addFields: {
-              whatsappNumber: {
-                $first: "$whatsappNumber",
+              owner: {
+                $first: "$owner",
               },
             },
           },
@@ -470,22 +479,31 @@ const getBorrowedData = asyncHandler(async (req, res) => {
     {
       $lookup: {
         from: "borroweds",
-        localField: "borrowedFrom",
-        foreignField: "_id",
+        localField: "_id",
+        foreignField: "owner",
         as: "borrowedFrom",
         pipeline: [
           {
             $lookup: {
-              from: "whatsapps",
-              localField: "whatsappNumber",
+              from: "users",
+              localField: "owner",
               foreignField: "_id",
-              as: "whatsappNumber",
+              as: "owner",
+              pipeline: [
+                {
+                  $project: {
+                    _id: 1,
+                    username: 1,
+                    whatsappNumber: 1,
+                  },
+                },
+              ],
             },
           },
           {
             $addFields: {
-              whatsappNumber: {
-                $first: "$whatsappNumber",
+              owner: {
+                $first: "$owner",
               },
             },
           },
@@ -493,6 +511,7 @@ const getBorrowedData = asyncHandler(async (req, res) => {
       },
     },
   ]);
+
 
   return res
     .status(200)
