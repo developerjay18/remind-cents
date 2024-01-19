@@ -16,8 +16,10 @@ app.use(express.static("public"));
 
 import userRouter from "./routes/user.route.js";
 import lendedRouter from "./routes/lended.route.js";
+import borrowedRouter from "./routes/borrowed.route.js";
 // setting routes
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/lended", lendedRouter);
+app.use("/api/v1/borrowed", borrowedRouter);
 
 export default app;
