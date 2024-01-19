@@ -4,6 +4,7 @@ import ApiError from "../utils/ApiError.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { User } from "../models/user.model.js";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 
 const generateAccessAndRefreshToken = async (userId) => {
   try {
@@ -33,7 +34,7 @@ const generateAccessAndRefreshToken = async (userId) => {
 // refreshAccesstoken
 // get current user
 // update account
-// update media
+// update profile && update QRCode
 // change current password
 // get lendedTo details - agreegation pipleline
 // get borrowedFrom details - agreegation pipleline
@@ -277,11 +278,231 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
 
   const { email, whatsappNumber, upiId, upiNumber, customMessage } = req.body;
 
-  const user = await User.findById(req.user?._id)
+  if (
+    [email, whatsappNumber, upiId, upiNumber, customMessage].some(
+      (item) => item === ""
+    )
+  ) {
+    throw new ApiError("404", "All fields are manadtory please fill all");
+  }
+
+  const user = await User.findByIdAndUpdate(
+    req.user?._id,
+    {
+      $set: {
+        email,
+        whatsappNumber,
+        upiId,
+        upiNumber,
+        customMessage,
+      },
+    },
+    {
+      new: true,
+    }
+  ).select("-password");
+
+  if (!user) {
+    throw new ApiError(
+      "404",
+      "Error occured while fetching user at updation time"
+    );
+  }
 
   return res
     .status(200)
-    .json(new ApiResponse(200, {}, "account updated successfully"));
+    .json(new ApiResponse(200, user, "account updated successfully"));
+});
+
+const updateProfile = asyncHandler(async (req, res) => {
+  // take local file
+  // check if empty
+  // upload on cloudinary
+  // check if uploaded
+  // return res
+
+  const profileLocalPath = req.file?.path;
+
+  if (!profileLocalPath) {
+    throw new ApiError("404", "profile local path not found");
+  }
+
+  const profile = await uploadOnCloudinary(profileLocalPath);
+
+  if (!profile?.url) {
+    throw new ApiError(
+      "500",
+      "Error occured while uploading pic on cloudinary"
+    );
+  }
+
+  const user = await User.findByIdAndUpdate(
+    req.user?._id,
+    {
+      $set: {
+        profile: profile.url,
+      },
+    },
+    { new: true }
+  ).select("-password");
+
+  if (!user) {
+    throw new ApiError("500", "error occured while updating image on database");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user, "profile updated sucessfully"));
+});
+
+const updateQRCode = asyncHandler(async (req, res) => {
+  // take local file
+  // check if empty
+  // upload on cloudinary
+  // check if uploaded
+  // return res
+
+  const QRCodeLocalPath = req.file?.path;
+
+  if (!QRCodeLocalPath) {
+    throw new ApiError("404", "profile local path not found");
+  }
+
+  const QRCode = await uploadOnCloudinary(QRCodeLocalPath);
+
+  if (!QRCode?.url) {
+    throw new ApiError(
+      "500",
+      "Error occured while uploading pic on cloudinary"
+    );
+  }
+
+  const user = await User.findByIdAndUpdate(
+    req.user?._id,
+    {
+      $set: {
+        QRCode: QRCode.url,
+      },
+    },
+    { new: true }
+  ).select("-password");
+
+  if (!user) {
+    throw new ApiError("500", "error occured while updating image on database");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user, "profile updated sucessfully"));
+});
+
+const changePassword = asyncHandler(async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+
+  if (!newPassword) {
+    throw new ApiError("401", "new and old both password are mandatory");
+  }
+
+  const user = await User.findById(req.user?._id);
+
+  const isPasswordValid = await user.isPasswordCorrect(oldPassword);
+
+  if (!isPasswordValid) {
+    throw new ApiError("401", "Password doen't match with each other");
+  }
+
+  user.password = newPassword;
+  user.save({ validateBeforeSave: false });
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "password changed successfully"));
+});
+
+const getLendedData = asyncHandler(async (req, res) => {
+  const user = await User.aggregate([
+    {
+      $match: {
+        _id: new mongoose.Types.ObjectId(req.user._id),
+      },
+    },
+    {
+      $lookup: {
+        from: "lendeds",
+        localField: "lendedTo",
+        foreignField: "_id",
+        as: "lendedTo",
+        pipeline: [
+          {
+            $lookup: {
+              from: "whatsapps",
+              localField: "whatsappNumber",
+              foreignField: "_id",
+              as: "whatsappNumber",
+            },
+          },
+          {
+            $addFields: {
+              whatsappNumber: {
+                $first: "$whatsappNumber",
+              },
+            },
+          },
+        ],
+      },
+    },
+  ]);
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, user[0].lendedTo, "Lended data fetched successfully")
+    );
+});
+
+const getBorrowedData = asyncHandler(async (req, res) => {
+  const user = await User.aggregate([
+    {
+      $match: {
+        _id: new mongoose.Types.ObjectId(req.user._id),
+      },
+    },
+    {
+      $lookup: {
+        from: "borroweds",
+        localField: "borrowedFrom",
+        foreignField: "_id",
+        as: "borrowedFrom",
+        pipeline: [
+          {
+            $lookup: {
+              from: "whatsapps",
+              localField: "whatsappNumber",
+              foreignField: "_id",
+              as: "whatsappNumber",
+            },
+          },
+          {
+            $addFields: {
+              whatsappNumber: {
+                $first: "$whatsappNumber",
+              },
+            },
+          },
+        ],
+      },
+    },
+  ]);
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        user[0].borrowedFrom,
+        "Borrowed from data fetched successfully"
+      )
+    );
 });
 
 export {
@@ -291,4 +512,9 @@ export {
   refreshAccessToken,
   getCurrentUser,
   updateAccountDetails,
+  updateProfile,
+  updateQRCode,
+  changePassword,
+  getLendedData,
+  getBorrowedData,
 };
