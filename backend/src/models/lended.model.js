@@ -14,6 +14,10 @@ const lendedSchema = new Schema(
       type: String,
       required: true,
     },
+    startDate: {
+      type: Date, // Store the start date as a Date type
+      default: Date.now,
+    },
     whatsappNumber: {
       type: String,
       required: true,

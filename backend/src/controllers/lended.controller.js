@@ -3,6 +3,9 @@ import ApiError from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Lended } from "../models/lended.model.js";
 import { isValidObjectId } from "mongoose";
+import sendWhatsappMessage from "../utils/sendMessage.js";
+import cron from "node-cron";
+import { User } from "../models/user.model.js";
 
 const addLendedEntry = asyncHandler(async (req, res) => {
   // take data
@@ -170,6 +173,55 @@ const getEntryOwnerDetails = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(new ApiResponse(200, req.user, "Entry owner fetched successfully"));
+});
+
+// main function that is sending messages
+async function sendReminderMessages() {
+  try {
+    // Get lended entries with expired durations
+    const expiredEntries = await Lended.find({
+      $expr: {
+        $gte: [
+          { $subtract: [new Date(), "$startDate"] }, // Calculate the difference in milliseconds
+          { $multiply: [{ $toDecimal: "$duration" }, 24 * 60 * 60 * 1000] }, // Convert duration to numeric and then to milliseconds
+        ],
+      },
+    });
+
+    // Send reminders to users with expired durations
+    expiredEntries.forEach(async (entry) => {
+      const lender = await User.findById(entry?.owner).select("-password");
+
+      // Send reminder only if the entry has a WhatsApp number
+      if (entry.whatsappNumber) {
+        const message = `Hello! 👋 
+I am the virtual assistant of ${lender.username}.
+
+I wanted to remind you about a transaction we had:
+👇👇👇👇
+*Amount:* ${entry.amount} Rs.
+*Taken Date:* ${entry.startDate}
+*Duration:* ${entry.duration} days
+        
+According to our records, the repayment is due soon. Please ensure to complete the payment by the specified date.
+        
+If you have any questions or concerns, feel free to let me know. I'm here to assist you.
+        
+Best regards,
+Remind Cents`;
+
+        // Send WhatsApp message
+        sendWhatsappMessage(`+91${entry.whatsappNumber}`, message);
+      }
+    });
+  } catch (error) {
+    console.error("Error sending reminders:", error);
+  }
+}
+
+// Schedule the function to run at 00:00 every day
+cron.schedule("40 8 * * *", () => {
+  sendReminderMessages();
 });
 
 export {
