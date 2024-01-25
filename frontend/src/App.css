@@ -1,0 +1,5 @@
+.gradient-bg {
+  background-image: url('https://tailwindui.com/img/beams-pricing.png');
+  background-size: cover;
+  background-position: center;
+}
