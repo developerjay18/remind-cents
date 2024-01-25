@@ -13,7 +13,7 @@ export function Signup() {
       <section>
         <div className="grid pt-16 lg:pt-0 grid-cols-1 lg:grid-cols-1 font-poppins">
           {/* left  */}
-          <div className="flex items-center justify-center px-4 py-10 sm:px-6 sm:py-28 lg:py-28 lg:px-8">
+          <div className="flex items-center justify-center px-4 py-10 sm:px-6 sm:py-28 lg:py-32 lg:px-8">
             <div className="xl:mx-auto xl:w-full">
               <h2 className="text-3xl font-bold leading-tight text-black sm:text-4xl">
                 Sign up
