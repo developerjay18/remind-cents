@@ -11,9 +11,7 @@ const generateAccessAndRefreshToken = async (userId) => {
     const user = await User.findById(userId);
 
     const accessToken = user.generateAccessToken();
-    console.log("access token generated");
     const refreshToken = user.generateRefreshToken();
-    console.log("refresh token generated");
 
     user.refreshToken = refreshToken;
     await user.save({ validateBeforeSave: false });
@@ -62,7 +60,6 @@ const registerUser = asyncHandler(async (req, res) => {
     customMessage,
   } = req.body;
 
-  console.log(username, email, password);
 
   if (
     [username, email, password, whatsappNumber, upiId, upiNumber].some(

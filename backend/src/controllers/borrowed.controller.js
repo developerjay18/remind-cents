@@ -6,6 +6,10 @@ import { isValidObjectId } from "mongoose";
 import cron from "node-cron";
 import sendWhatsappMessage from "../utils/sendMessage.js";
 import { User } from "../models/user.model.js";
+import {
+  generateBorrowedMsgClient,
+  generateBorrowedMsgUser,
+} from "../utils/MessageFormat.js";
 
 const addBorrowedEntry = asyncHandler(async (req, res) => {
   // take data
@@ -180,43 +184,26 @@ const getEntryOwnerDetails = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, req.user, "Entry owner fetched successfully"));
 });
 
-// // main logic handling
+// main logic handling function
 async function sendBorrowedReminders() {
   try {
-    // Get borrowed entries with expired durations
     const overdueEntries = await Borrowed.find({
       $expr: {
         $gte: [
-          { $subtract: [new Date(), "$startDate"] }, // Calculate the difference in milliseconds
-          { $multiply: [{ $toDecimal: "$duration" }, 24 * 60 * 60 * 1000] }, // Convert duration to numeric and then to milliseconds
+          { $subtract: [new Date(), "$startDate"] },
+          { $multiply: [{ $toDecimal: "$duration" }, 24 * 60 * 60 * 1000] },
         ],
       },
     });
 
-    // Send reminders to users with overdue durations
     overdueEntries.forEach(async (entry) => {
       const user = await User.findById(entry?.owner).select("-password");
 
-      // Send reminder only if the entry has a WhatsApp number
       if (entry.whatsappNumber) {
-        // Customize your reminder message
-        const message = `Hello ${user.username}, 
-
-This is a friendly reminder that you borrowed ${entry.amount} Rs. from ${entry.name} and the repayment is overdue. 
-👇👇👇👇
-*Amount:* ${entry.amount} Rs.
-*Taken Date:* ${entry.startDate}
-*Duration:* ${entry.duration} days
-
-Please make the payment as soon as possible.
-
-Thank you for your prompt attention to this matter.
-
-Best regards,
-Remind Cents`;
-
-        // Send WhatsApp message
-        sendWhatsappMessage(`+91${entry.whatsappNumber}`, message);
+        const message = generateBorrowedMsgUser(user, entry);
+        const message2 = generateBorrowedMsgClient(user, entry);
+        sendWhatsappMessage(`+91${user.whatsappNumber}`, message);
+        sendWhatsappMessage(`+91${entry.whatsappNumber}`, message2);
       }
     });
   } catch (error) {
@@ -224,8 +211,7 @@ Remind Cents`;
   }
 }
 
-// Schedule the function to run at 10:46 a.m. every day
-cron.schedule("47 8 * * *", () => {
+cron.schedule("04 15 * * *", () => {
   sendBorrowedReminders();
 });
 

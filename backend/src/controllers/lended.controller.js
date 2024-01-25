@@ -6,6 +6,10 @@ import { isValidObjectId } from "mongoose";
 import sendWhatsappMessage from "../utils/sendMessage.js";
 import cron from "node-cron";
 import { User } from "../models/user.model.js";
+import {
+  generateLendedMsgClient,
+  generateLendedMsgUser,
+} from "../utils/MessageFormat.js";
 
 const addLendedEntry = asyncHandler(async (req, res) => {
   // take data
@@ -175,43 +179,26 @@ const getEntryOwnerDetails = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, req.user, "Entry owner fetched successfully"));
 });
 
-// main function that is sending messages
+// main logic handling function
 async function sendReminderMessages() {
   try {
-    // Get lended entries with expired durations
     const expiredEntries = await Lended.find({
       $expr: {
         $gte: [
-          { $subtract: [new Date(), "$startDate"] }, // Calculate the difference in milliseconds
-          { $multiply: [{ $toDecimal: "$duration" }, 24 * 60 * 60 * 1000] }, // Convert duration to numeric and then to milliseconds
+          { $subtract: [new Date(), "$startDate"] },
+          { $multiply: [{ $toDecimal: "$duration" }, 24 * 60 * 60 * 1000] },
         ],
       },
     });
 
-    // Send reminders to users with expired durations
     expiredEntries.forEach(async (entry) => {
-      const lender = await User.findById(entry?.owner).select("-password");
+      const user = await User.findById(entry?.owner).select("-password");
 
-      // Send reminder only if the entry has a WhatsApp number
       if (entry.whatsappNumber) {
-        const message = `Hello! 👋 
-I am the virtual assistant of ${lender.username}.
-
-I wanted to remind you about a transaction we had:
-👇👇👇👇
-*Amount:* ${entry.amount} Rs.
-*Taken Date:* ${entry.startDate}
-*Duration:* ${entry.duration} days
-        
-According to our records, the repayment is due soon. Please ensure to complete the payment by the specified date.
-        
-If you have any questions or concerns, feel free to let me know. I'm here to assist you.
-        
-Best regards,
-Remind Cents`;
-
-        // Send WhatsApp message
+        const message = generateLendedMsgClient(user, entry);
+        const message2 = generateLendedMsgUser(user, entry);
         sendWhatsappMessage(`+91${entry.whatsappNumber}`, message);
+        sendWhatsappMessage(`+91${user.whatsappNumber}`, message2);
       }
     });
   } catch (error) {
@@ -219,8 +206,7 @@ Remind Cents`;
   }
 }
 
-// Schedule the function to run at 00:00 every day
-cron.schedule("40 8 * * *", () => {
+cron.schedule("04 15 * * *", () => {
   sendReminderMessages();
 });
 

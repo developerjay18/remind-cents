@@ -76,7 +76,6 @@ userSchema.methods.isPasswordCorrect = async function (password) {
 };
 
 userSchema.methods.generateAccessToken = function () {
-  console.log("enter into model function access");
   return jwt.sign(
     {
       _id: this._id,
@@ -91,7 +90,6 @@ userSchema.methods.generateAccessToken = function () {
 };
 
 userSchema.methods.generateRefreshToken = function () {
-  console.log("enter into model function refresh");
   return jwt.sign(
     {
       _id: this._id,
