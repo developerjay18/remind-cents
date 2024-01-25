@@ -42,9 +42,6 @@ const userSchema = new Schema(
       type: String, // cloudinary URL
       required: true,
     },
-    customMessage: {
-      type: String,
-    },
     refreshToken: {
       type: String,
     },

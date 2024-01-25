@@ -57,7 +57,6 @@ const registerUser = asyncHandler(async (req, res) => {
     whatsappNumber,
     upiId,
     upiNumber,
-    customMessage,
   } = req.body;
 
 
