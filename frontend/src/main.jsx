@@ -8,7 +8,18 @@ import {
   createRoutesFromElements,
   Route,
 } from 'react-router-dom';
-import { Home, Login, Signup } from './pages/index.js';
+import {
+  AddBorrowing,
+  AddLending,
+  Borrowings,
+  EditBorrowing,
+  EditLending,
+  Home,
+  Lendings,
+  Login,
+  Profile,
+  Signup,
+} from './pages/index.js';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -16,6 +27,13 @@ const router = createBrowserRouter(
       <Route path="/" element={<Home />} />
       <Route path="/sign-up" element={<Signup />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/lendings" element={<Lendings />} />
+      <Route path="/lendings/add" element={<AddLending />} />
+      <Route path="/lendings/edit" element={<EditLending />} />
+      <Route path="/borrowings" element={<Borrowings />} />
+      <Route path="/borrowings/add" element={<AddBorrowing />} />
+      <Route path="/borrowings/edit" element={<EditBorrowing />} />
+      <Route path="/profile" element={<Profile />} />
     </Route>
   )
 );
