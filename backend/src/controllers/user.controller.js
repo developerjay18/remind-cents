@@ -50,15 +50,8 @@ const registerUser = asyncHandler(async (req, res) => {
   // find and check user from DB
   // return res
 
-  const {
-    username,
-    email,
-    password,
-    whatsappNumber,
-    upiId,
-    upiNumber,
-  } = req.body;
-
+  const { username, email, password, whatsappNumber, upiId, upiNumber } =
+    req.body;
 
   if (
     [username, email, password, whatsappNumber, upiId, upiNumber].some(
@@ -74,6 +67,9 @@ const registerUser = asyncHandler(async (req, res) => {
   const profileLocalPath = req.files?.profile[0]?.path;
   const QRCodeLocalPath = req.files?.QRCode[0]?.path;
 
+  console.log(profileLocalPath);
+  console.log(QRCodeLocalPath);
+
   if (!profileLocalPath && !QRCodeLocalPath) {
     throw new ApiError(
       "401",
@@ -81,10 +77,10 @@ const registerUser = asyncHandler(async (req, res) => {
     );
   }
 
-  const profile = await uploadOnCloudinary(profileLocalPath);
-  const QRCode = await uploadOnCloudinary(QRCodeLocalPath);
+  const profileUrl = await uploadOnCloudinary(profileLocalPath);
+  const QRCodeUrl = await uploadOnCloudinary(QRCodeLocalPath);
 
-  if (!profile && !QRCode) {
+  if (!profileUrl && !QRCodeUrl) {
     throw new ApiError(
       "401",
       "Path not found while uploading files on cloudinary"
@@ -98,9 +94,8 @@ const registerUser = asyncHandler(async (req, res) => {
     whatsappNumber,
     upiId,
     upiNumber,
-    profile: profile?.url,
-    QRCode: QRCode?.url,
-    customMessage: customMessage || "",
+    profile: profileUrl?.url,
+    QRCode: QRCodeUrl?.url,
   });
 
   const createdUser = await User.findById(user?._id).select(
@@ -507,7 +502,6 @@ const getBorrowedData = asyncHandler(async (req, res) => {
       },
     },
   ]);
-
 
   return res
     .status(200)
