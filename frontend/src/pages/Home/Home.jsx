@@ -1,8 +1,40 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Navbar } from '../../components';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { authenticationCheck } from '../../utils/checkTokenExpiry';
+import { useDispatch } from 'react-redux';
+import { setAuth } from '../../store/authSlice';
+import axios from 'axios';
 
 export default function Home() {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const resp = await authenticationCheck();
+        console.log('Authentication response:', resp);
+
+        dispatch(setAuth(resp));
+
+        if (!resp) {
+          navigate('/login');
+        }
+        // const storedRefreshToken = localStorage.getItem('refreshToken');
+        // console.log(storedRefreshToken);
+        // const response = await axios.post('/api/v1/users/refresh-token', {
+        //   refreshToken: storedRefreshToken,
+        // });
+        // console.log(response);
+      } catch (error) {
+        console.error('Error checking authentication:', error);
+      }
+    };
+
+    checkAuth();
+  }, [dispatch, navigate]);
+
   return (
     <div className="">
       <Navbar />

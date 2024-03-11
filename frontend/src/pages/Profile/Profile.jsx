@@ -1,175 +1,130 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Navbar } from '../../components';
 import { ArrowRight } from 'lucide-react';
-
+import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { authenticationCheck } from '../../utils/checkTokenExpiry';
+import { setAuth } from '../../store/authSlice';
+import axios from 'axios';
 function Profile() {
+  const [user, setUser] = useState({});
+
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const resp = await authenticationCheck();
+        console.log('Authentication response:', resp);
+
+        dispatch(setAuth(resp));
+
+        if (!resp) {
+          navigate('/login');
+        }
+
+        const userData = await axios.get('/api/v1/users/current-user');
+        setUser(userData.data.data);
+      } catch (error) {
+        console.error('Error checking authentication:', error);
+      }
+    };
+
+    checkAuth();
+  }, [dispatch, navigate]);
+
+  const userDetails = [
+    {
+      title: 'Username',
+      value: user.username,
+    },
+    {
+      title: 'Email',
+      value: user.email,
+    },
+    {
+      title: 'whatsapp number',
+      value: `+91 ${user.whatsappNumber}`,
+    },
+    {
+      title: 'upi ID',
+      value: user.upiId,
+    },
+    {
+      title: 'upi number',
+      value: user.upiNumber,
+    },
+  ];
+
   return (
-    <div className="font-poppins gradient-bg h-screen">
+    <div className="font-poppins gradient-bg max-h-screen overflow-hidden">
       <Navbar />
 
-      <section className="px-4 py-10 sm:px-6 sm:py-28 lg:py-32 lg:px-8 flex flex-col gap-5">
+      <div className="px-4 py-10 sm:px-6 sm:py-28 lg:py-32 lg:px-8">
         {/* profile  */}
         <div className="profile-icon w-[20%]">
           <div className="flex items-center space-x-2">
             <img
               className="inline-block h-12 w-12 rounded-full object-cover"
-              src="https://res.cloudinary.com/remind-cents-cloud/image/upload/v1706153488/hy0e5p5yimgazmrbnwdi.jpg"
+              src={user.profile}
               alt=""
             />
             <span className="flex flex-col">
               <span className="text-sm font-medium text-gray-900">
-                Dan Abromov
+                {user.username}
               </span>
               <span className="text-sm font-medium text-gray-500">
-                +91 6351-6666-9090
+                +91 {user.whatsappNumber}
               </span>
             </span>
           </div>
         </div>
 
-        <form action="" method="post" className="flex justify-between">
-          {/* fields=1 */}
-          <div className="fields w-[30%] flex flex-col gap-5">
-            <div className="w-[80%]">
-              <label
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                htmlFor="email"
+        {/* remaining section  */}
+        <section className="mx-auto w-full py-4 my-5 flex flex-col gap-5">
+          <div className="profile-infos bg-white rounded-md flex flex-col gap-3 p-5">
+            {userDetails?.map((item, index) => (
+              <div
+                className="info flex gap-3 border-b border-gray-300 pb-1"
+                key={index}
               >
-                Email
-              </label>
-              <input
-                className="flex h-10 w-full rounded-md border border-black/30 bg-transparent px-3 py-2 text-sm placeholder:text-gray-600 focus:outline-none focus:ring-1 focus:ring-black/30 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50"
-                type="email"
-                id="email"
-                value={'raijay2003@gmail.com'}
-              ></input>
-            </div>
-
-            <div className="w-[80%]">
-              <label
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                htmlFor="password"
-              >
-                password
-              </label>
-              <input
-                className="flex h-10 w-full rounded-md border border-black/30 bg-transparent px-3 py-2 text-sm placeholder:text-gray-600 focus:outline-none focus:ring-1 focus:ring-black/30 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50"
-                type="password"
-                id="password"
-                value={'Vadapav-kaho-'}
-              ></input>
-            </div>
-
-            <div className="w-[80%]">
-              <label
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                htmlFor="whatsappNumber"
-              >
-                Whatsapp Number
-              </label>
-              <input
-                className="flex h-10 w-full rounded-md border border-black/30 bg-transparent px-3 py-2 text-sm placeholder:text-gray-600 focus:outline-none focus:ring-1 focus:ring-black/30 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50"
-                type="text"
-                id="whatsappNumber"
-                value={'9099757285'}
-              ></input>
-            </div>
+                <span className="capitalize w-[20%]">{item.title}:</span>
+                <span className="text-gray-700">{item.value}</span>
+              </div>
+            ))}
           </div>
 
-          {/* fields=2 */}
-          <div className="fields w-[30%] flex flex-col gap-5">
-            <div className="w-[80%]">
-              <label
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                htmlFor="upiId"
-              >
-                UPI ID
-              </label>
-              <input
-                className="flex h-10 w-full rounded-md border border-black/30 bg-transparent px-3 py-2 text-sm placeholder:text-gray-600 focus:outline-none focus:ring-1 focus:ring-black/30 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50"
-                type="text"
-                id="upiId"
-                name="upiId"
-                value={'raijay2003@okhdfcbank'}
-              ></input>
-            </div>
-
-            <div className="w-[80%]">
-              <label
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                htmlFor="upiNumber"
-              >
-                UPI Number
-              </label>
-              <input
-                className="flex h-10 w-full rounded-md border border-black/30 bg-transparent px-3 py-2 text-sm placeholder:text-gray-600 focus:outline-none focus:ring-1 focus:ring-black/30 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50"
-                type="upiNumber"
-                id="upiNumber"
-                value={'8976898900'}
-              ></input>
-            </div>
-
-            <div className="w-[80%] pt-6">
+          <div className="actions flex justify-between">
+            <div className="">
               <button
                 type="button"
-                className="inline-flex w-full items-center justify-center rounded-md bg-black px-3.5 py-2 font-semibold leading-7 text-white hover:bg-black/80"
+                className="rounded-md border border-black px-3 py-2 text-sm font-semibold text-black shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black capitalize"
               >
-                Delete Account <ArrowRight className="ml-2" size={16} />
+                update account details
+              </button>
+            </div>
+
+            <div className="">
+              <button
+                type="button"
+                className="rounded-md border border-black px-3 py-2 text-sm font-semibold text-black shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black capitalize"
+              >
+                change password
+              </button>
+            </div>
+
+            <div className="">
+              <button
+                type="button"
+                className="rounded-md border border-black px-3 py-2 text-sm font-semibold text-black shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black capitalize"
+              >
+                update profile photo
               </button>
             </div>
           </div>
-
-          {/* fields=3 */}
-          <div className="fields w-[30%] flex flex-col gap-5">
-            {/* profile pic  */}
-            <div className="w-[80%]">
-              <label
-                htmlFor="profile"
-                className="text-base font-medium text-gray-900"
-              >
-                {' '}
-                New Profile Image{' '}
-              </label>
-              <div className="">
-                <input
-                  className="flex h-10 w-full rounded-md border border-black/30 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50"
-                  type="file"
-                  id="profile"
-                  name="profile"
-                ></input>
-              </div>
-            </div>
-
-            {/* QR code  */}
-            <div className="w-[80%]">
-              <label
-                htmlFor="QRCode"
-                className="text-base font-medium text-gray-900"
-              >
-                {' '}
-                New QRCode{' '}
-              </label>
-              <div className="">
-                <input
-                  className="flex h-10 w-full rounded-md border border-black/30 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50"
-                  type="file"
-                  id="QRCode"
-                  name="QRCode"
-                ></input>
-              </div>
-            </div>
-
-            <div className="w-[80%] pt-6">
-              <button
-                type="button"
-                className="inline-flex w-full items-center justify-center rounded-md bg-black px-3.5 py-2 font-semibold leading-7 text-white hover:bg-black/80"
-              >
-                Update Profile <ArrowRight className="ml-2" size={16} />
-              </button>
-            </div>
-          </div>
-        </form>
-      </section>
+        </section>
+      </div>
     </div>
   );
 }

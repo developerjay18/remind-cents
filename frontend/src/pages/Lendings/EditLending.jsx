@@ -1,10 +1,57 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { Navbar } from '../../components';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import axios from 'axios';
+import { setAuth } from '../../store/authSlice';
+import { useDispatch } from 'react-redux';
 
 export default function EditLending() {
+  const [entryData, setEntryData] = useState({});
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { id } = useParams();
+
+  useEffect(() => {
+    const fetchEntry = async (id) => {
+      try {
+        const entryId = id;
+        const response = await axios.get(`/api/v1/lended/${entryId}`);
+        setEntryData(response.data.data);
+      } catch (error) {
+        console.log('ERROR WHILE FETCHING EDIT ENTRY DATA ON FRONTEND', error);
+      }
+    };
+
+    fetchEntry(id);
+  }, [id]);
+
+  const editEntry = async (id) => {
+    try {
+      const response = await axios.patch(`/api/v1/lended/${id}`, entryData);
+      console.log(response.data.data);
+    } catch (error) {
+      console.log('ERROR WHILE EDITING ENTRY ON FRONTEND', error);
+    }
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setEntryData((prevFormData) => ({
+      ...prevFormData,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    editEntry(entryData._id);
+
+    setEntryData({});
+    dispatch(setAuth(true));
+    navigate('/lendings');
+  };
 
   return (
     <div className="font-poppins h-screen overflow-hidden">
@@ -17,7 +64,12 @@ export default function EditLending() {
               <h2 className="text-3xl font-bold leading-tight text-black sm:text-4xl">
                 Edit Entry
               </h2>
-              <form action="#" method="POST" className="mt-8">
+              <form
+                action="#"
+                method="POST"
+                className="mt-8"
+                onSubmit={handleSubmit}
+              >
                 <div className="space-y-5">
                   <div>
                     <label
@@ -33,6 +85,9 @@ export default function EditLending() {
                         type="text"
                         placeholder="saved name"
                         id="name"
+                        name="name"
+                        value={entryData.name}
+                        onChange={handleChange}
                       ></input>
                     </div>
                   </div>
@@ -51,6 +106,9 @@ export default function EditLending() {
                         type="text"
                         placeholder="amount"
                         id="amount"
+                        name="amount"
+                        value={entryData.amount}
+                        onChange={handleChange}
                       ></input>
                     </div>
                   </div>
@@ -71,6 +129,9 @@ export default function EditLending() {
                         type="text"
                         placeholder="duration"
                         id="duration"
+                        name="duration"
+                        value={entryData.duration}
+                        onChange={handleChange}
                       ></input>
                     </div>
                   </div>
@@ -91,14 +152,16 @@ export default function EditLending() {
                         type="text"
                         placeholder="Whatsapp Number"
                         id="whatsappNumber"
+                        name="whatsappNumber"
+                        value={entryData.whatsappNumber}
+                        onChange={handleChange}
                       ></input>
                     </div>
                   </div>
                   <div>
                     <button
-                      type="button"
+                      type="submit"
                       className="inline-flex w-full items-center justify-center rounded-md bg-black px-3.5 py-2.5 font-semibold leading-7 text-white hover:bg-black/80"
-                      onClick={() => navigate('/lendings')}
                     >
                       Save <ArrowRight className="ml-2" size={16} />
                     </button>

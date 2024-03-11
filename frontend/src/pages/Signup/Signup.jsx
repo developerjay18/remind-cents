@@ -22,7 +22,7 @@ export function Signup() {
   const registerUser = async (userData) => {
     try {
       const response = await axios.post(
-        'http://localhost:8000/api/v1/users/register',
+        '/api/v1/users/register',
         userData,
         {
           headers: {
@@ -60,6 +60,7 @@ export function Signup() {
     });
     setProfileFile(null);
     setQRCodeFile(null);
+    navigate("/login")
   };
 
   const handleChange = (e) => {

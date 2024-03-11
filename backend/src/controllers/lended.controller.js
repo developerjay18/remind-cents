@@ -20,7 +20,7 @@ const addLendedEntry = asyncHandler(async (req, res) => {
   const { name, amount, duration, whatsappNumber } = req.body;
   const user = req.user;
   if (
-    [name, amount, duration, whatsappNumber].some((item) => item.trim() === "")
+    [name, amount, duration, whatsappNumber].some((item) => item === "")
   ) {
     throw new ApiError("401", "All fields are required to add entry");
   }
@@ -60,8 +60,10 @@ const updateLendedEntry = asyncHandler(async (req, res) => {
   const { name, amount, duration, whatsappNumber } = req.body;
   const { entryId } = req.params;
 
+  console.log(entryId);
+
   if (
-    [name, amount, duration, whatsappNumber].some((item) => item.trim() === "")
+    [name, amount, duration, whatsappNumber].some((item) => item === "")
   ) {
     throw new ApiError("401", "All fields are required for updation");
   }

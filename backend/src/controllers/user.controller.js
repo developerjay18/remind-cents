@@ -152,6 +152,9 @@ const loginUser = asyncHandler(async (req, res) => {
     user?._id
   );
 
+  console.log("accessToken from backend", accessToken);
+  console.log("refreshToken from backend", refreshToken);
+
   const loggedInUser = await User.findById(user.id).select(
     "-password -refreshToken"
   );
@@ -210,8 +213,9 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
   const token = req.cookies?.refreshToken || req.body.refreshToken;
 
+
   if (!token) {
-    throw new ApiError("404", "token not found");
+    throw new ApiError("404", "token not found in refreshing token");
   }
 
   const decodedToken = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);

@@ -8,6 +8,7 @@ import Borrowings from './Borrowings/Borrowings';
 import AddBorrowing from './Borrowings/AddBorrowing';
 import EditBorrowing from './Borrowings/EditBorrowing';
 import Profile from './Profile/Profile';
+import ResetPassword from './ResetPassword/ResetPassword';
 
 export {
   Signup,
@@ -20,4 +21,5 @@ export {
   AddBorrowing,
   EditBorrowing,
   Profile,
+  ResetPassword
 };

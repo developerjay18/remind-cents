@@ -1,9 +1,56 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { Navbar } from '../../components';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { setAuth } from '../../store/authSlice';
 
 export default function Login() {
+  const [formData, setFormData] = useState({
+    username: '',
+    password: '',
+  });
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const authStatus = useSelector((state) => state.isAuthenticated);
+
+  const loginUser = async (userData) => {
+    try {
+      const response = await axios.post('/api/v1/users/login', userData);
+
+      console.log(response);
+      if (response.data) {
+        localStorage.setItem('accessToken', response.data.data.accessToken);
+        localStorage.setItem('refreshToken', response.data.data.refreshToken);
+      }
+    } catch (error) {
+      console.log('ERROR OCCURED VIA LOGIN FROM FRONTEND', error);
+    }
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    await loginUser(formData);
+    setFormData({
+      username: '',
+      password: '',
+    });
+
+    await dispatch(setAuth(true));
+    navigate('/');
+  };
+
   return (
     <div className="gradient-bg">
       {/* navbar  */}
@@ -26,53 +73,67 @@ export default function Login() {
                   Create a free account
                 </Link>
               </p>
-              <form action="#" method="POST" className="mt-8">
+              <form
+                action="#"
+                method="POST"
+                className="mt-8"
+                onSubmit={handleSubmit}
+              >
                 <div className="space-y-5">
                   <div>
                     <label
-                      htmlFor=""
+                      htmlFor="username"
                       className="text-base font-medium text-gray-900"
                     >
                       {' '}
-                      Email address{' '}
+                      Username{' '}
                     </label>
                     <div className="mt-2">
                       <input
                         className="flex h-10 w-full rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50"
-                        type="email"
-                        placeholder="Email"
+                        type="text"
+                        placeholder="Username"
+                        name="username"
+                        id="username"
+                        onChange={handleChange}
+                        value={formData.username}
+                        required
                       ></input>
                     </div>
                   </div>
                   <div>
                     <div className="flex items-center justify-between">
                       <label
-                        htmlFor=""
+                        htmlFor="password"
                         className="text-base font-medium text-gray-900"
                       >
                         {' '}
                         Password{' '}
                       </label>
-                      <a
-                        href="#"
-                        title=""
+                      <Link
+                        to={'/reset-password'}
                         className="text-sm font-semibold text-black hover:underline"
                       >
                         {' '}
                         Forgot password?{' '}
-                      </a>
+                      </Link>
                     </div>
                     <div className="mt-2">
                       <input
                         className="flex h-10 w-full rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50"
                         type="password"
                         placeholder="Password"
+                        id="password"
+                        name="password"
+                        onChange={handleChange}
+                        value={formData.password}
+                        required
                       ></input>
                     </div>
                   </div>
                   <div>
                     <button
-                      type="button"
+                      type="submit"
                       className="inline-flex w-full items-center justify-center rounded-md bg-black px-3.5 py-2.5 font-semibold leading-7 text-white hover:bg-black/80"
                     >
                       Get started <ArrowRight className="ml-2" size={16} />

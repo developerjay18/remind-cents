@@ -2,6 +2,8 @@ import React from 'react';
 import { Menu, X } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const menuItems = [
   {
@@ -25,12 +27,20 @@ const menuItems = [
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const isAuthenticationRoute =
     location.pathname === '/login' || location.pathname === '/sign-up';
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+  };
+
+  const handleLogout = async () => {
+    const response = await axios.post('/api/v1/users/logout');
+    localStorage.removeItem("accessToken")
+    localStorage.removeItem("refreshToken")
+    navigate("/sign-up")
   };
 
   return (
@@ -81,14 +91,13 @@ export function Navbar() {
             </Link>
           </div>
           <div className={`${isAuthenticationRoute ? 'hidden' : 'flex gap-5'}`}>
-            <Link to={'/sign-up'}>
               <button
                 type="button"
                 className="rounded-md bg-black px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-black/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+                onClick={handleLogout}
               >
                 Logout
               </button>
-            </Link>
           </div>
         </div>
         <div className="lg:hidden">
