@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Navbar } from '../../components';
 import { ArrowRight } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { authenticationCheck } from '../../utils/checkTokenExpiry';
 import { setAuth } from '../../store/authSlice';
@@ -97,31 +97,27 @@ function Profile() {
 
           <div className="actions flex justify-between">
             <div className="">
-              <button
-                type="button"
-                className="rounded-md border border-black px-3 py-2 text-sm font-semibold text-black shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black capitalize"
-              >
-                update account details
-              </button>
+              <Link to={'/update-account'}>
+                <button
+                  type="button"
+                  className="rounded-md border border-black px-3 py-2 text-sm font-semibold text-black shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black capitalize"
+                >
+                  update account details
+                </button>
+              </Link>
             </div>
 
             <div className="">
-              <button
-                type="button"
-                className="rounded-md border border-black px-3 py-2 text-sm font-semibold text-black shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black capitalize"
-              >
-                change password
-              </button>
+              <Link to={'/reset-password'}>
+                <button
+                  type="button"
+                  className="rounded-md border border-black px-3 py-2 text-sm font-semibold text-black shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black capitalize"
+                >
+                  change password
+                </button>
+              </Link>
             </div>
 
-            <div className="">
-              <button
-                type="button"
-                className="rounded-md border border-black px-3 py-2 text-sm font-semibold text-black shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black capitalize"
-              >
-                update profile photo
-              </button>
-            </div>
           </div>
         </section>
       </div>

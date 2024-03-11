@@ -65,9 +65,7 @@ const updateBorrowedEntry = asyncHandler(async (req, res) => {
   const { name, amount, duration, whatsappNumber } = req.body;
   const { entryId } = req.params;
 
-  if (
-    [name, amount, duration, whatsappNumber].some((item) => item.trim() === "")
-  ) {
+  if ([name, amount, duration, whatsappNumber].some((item) => item === "")) {
     throw new ApiError("401", "All fields are required for updation");
   }
 

@@ -213,7 +213,6 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
   const token = req.cookies?.refreshToken || req.body.refreshToken;
 
-
   if (!token) {
     throw new ApiError("404", "token not found in refreshing token");
   }
@@ -271,13 +270,9 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
   // update account details
   // return res
 
-  const { email, whatsappNumber, upiId, upiNumber, customMessage } = req.body;
+  const { email, whatsappNumber, upiId, upiNumber } = req.body;
 
-  if (
-    [email, whatsappNumber, upiId, upiNumber, customMessage].some(
-      (item) => item === ""
-    )
-  ) {
+  if ([email, whatsappNumber, upiId, upiNumber].some((item) => item === "")) {
     throw new ApiError("404", "All fields are manadtory please fill all");
   }
 
@@ -289,7 +284,6 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
         whatsappNumber,
         upiId,
         upiNumber,
-        customMessage,
       },
     },
     {

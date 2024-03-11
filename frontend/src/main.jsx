@@ -20,6 +20,7 @@ import {
   Profile,
   ResetPassword,
   Signup,
+  UpdateAccount,
 } from './pages/index.js';
 
 import { Provider } from 'react-redux';
@@ -31,14 +32,18 @@ const router = createBrowserRouter(
       <Route path="/" element={<Home />} />
       <Route path="/sign-up" element={<Signup />} />
       <Route path="/login" element={<Login />} />
+
       <Route path="/lendings" element={<Lendings />} />
       <Route path="/lendings/add" element={<AddLending />} />
       <Route path="/lendings/edit/:id" element={<EditLending />} />
+
       <Route path="/borrowings" element={<Borrowings />} />
       <Route path="/borrowings/add" element={<AddBorrowing />} />
       <Route path="/borrowings/edit/:id" element={<EditBorrowing />} />
+
       <Route path="/profile" element={<Profile />} />
       <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/update-account" element={<UpdateAccount />} />
     </Route>
   )
 );
