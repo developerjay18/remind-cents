@@ -1,10 +1,81 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { Navbar } from '../../components';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { setAuth } from '../../store/authSlice';
+import { authenticationCheck } from '../../utils/checkTokenExpiry';
+import axios from 'axios';
 
 export default function AddBorrowing() {
+  const [entry, setEntry] = useState({
+    name: '',
+    amount: '',
+    duration: '',
+    whatsappNumber: '',
+  });
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const resp = await authenticationCheck();
+        console.log('Authentication response:', resp);
+
+        dispatch(setAuth(resp));
+
+        if (!resp) {
+          navigate('/login');
+        }
+        // const storedRefreshToken = localStorage.getItem('refreshToken');
+        // console.log(storedRefreshToken);
+        // const response = await axios.post('/api/v1/users/refresh-token', {
+        //   refreshToken: storedRefreshToken,
+        // });
+        // console.log(response);
+      } catch (error) {
+        console.error('Error checking authentication:', error);
+      }
+    };
+
+    checkAuth();
+  }, [dispatch, navigate]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    console.log(name);
+    console.log(value);
+
+    setEntry((prevFormData) => ({
+      ...prevFormData,
+      [name]: value,
+    }));
+  };
+
+  const addEntry = async (data) => {
+    try {
+      const response = await axios.post('/api/v1/borrowed/add-entry', data);
+      console.log(response.data.data);
+    } catch (error) {
+      console.log('ERROR ON ADDING ENTRY FROM FRONT-END', error);
+    }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    addEntry(entry);
+
+    setEntry({
+      name: '',
+      amount: '',
+      duration: '',
+      whatsappNumber: '',
+    });
+
+    dispatch(setAuth(true));
+    navigate('/borrowings');
+  };
 
   return (
     <div className="font-poppins h-screen overflow-hidden">
@@ -17,7 +88,12 @@ export default function AddBorrowing() {
               <h2 className="text-3xl font-bold leading-tight text-black sm:text-4xl">
                 Add Entry
               </h2>
-              <form action="#" method="POST" className="mt-8">
+              <form
+                action="#"
+                method="POST"
+                className="mt-8"
+                onSubmit={handleSubmit}
+              >
                 <div className="space-y-5">
                   <div>
                     <label
@@ -33,6 +109,9 @@ export default function AddBorrowing() {
                         type="text"
                         placeholder="saved name"
                         id="name"
+                        name="name"
+                        onChange={handleChange}
+                        value={entry.name}
                       ></input>
                     </div>
                   </div>
@@ -51,6 +130,9 @@ export default function AddBorrowing() {
                         type="text"
                         placeholder="amount"
                         id="amount"
+                        name="amount"
+                        onChange={handleChange}
+                        value={entry.amount}
                       ></input>
                     </div>
                   </div>
@@ -71,6 +153,9 @@ export default function AddBorrowing() {
                         type="text"
                         placeholder="duration"
                         id="duration"
+                        name="duration"
+                        onChange={handleChange}
+                        value={entry.duration}
                       ></input>
                     </div>
                   </div>
@@ -91,14 +176,16 @@ export default function AddBorrowing() {
                         type="text"
                         placeholder="Whatsapp Number"
                         id="whatsappNumber"
+                        name="whatsappNumber"
+                        onChange={handleChange}
+                        value={entry.whatsappNumber}
                       ></input>
                     </div>
                   </div>
                   <div>
                     <button
-                      type="button"
+                      type="submit"
                       className="inline-flex w-full items-center justify-center rounded-md bg-black px-3.5 py-2.5 font-semibold leading-7 text-white hover:bg-black/80"
-                      onClick={() => navigate('/borrowings')}
                     >
                       Add <ArrowRight className="ml-2" size={16} />
                     </button>

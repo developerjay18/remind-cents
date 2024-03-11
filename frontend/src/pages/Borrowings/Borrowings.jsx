@@ -33,6 +33,16 @@ function Borrowings() {
     checkAuth();
   }, [dispatch, navigate, userBorrowings]);
 
+  const deleteEntry = async (id) => {
+    try {
+      const response = await axios.delete(`/api/v1/borrowed/${id}`);
+      console.log(response.data.data);
+    } catch (error) {
+      console.log('ERROR WHILE DELETING LENDED ENTRY ON FRONTEND', error);
+    }
+    console.log('entry deleting function started running');
+  };
+
   return (
     <div className="font-poppins">
       <Navbar />
@@ -144,7 +154,10 @@ function Borrowings() {
                               {item.startDate}
                             </td>
                             <td className="whitespace-nowrap px-1  py-4 text-right text-sm font-medium flex gap-5">
-                              <Link className="w-10" to={'/borrowings/edit'}>
+                              <Link
+                                className="w-10"
+                                to={`/borrowings/edit/${item._id}`}
+                              >
                                 <img
                                   src="https://res.cloudinary.com/remind-cents-cloud/image/upload/v1706273331/d6ucwm1iqpg8dheuh3sl.png"
                                   alt=""
@@ -159,12 +172,15 @@ function Borrowings() {
                                   alt=""
                                 />
                               </Link>
-                              <Link className="w-10" to={`/borrowings/delete`}>
+                              <button
+                                className="w-10"
+                                onClick={() => deleteEntry(item._id)}
+                              >
                                 <img
                                   src="https://res.cloudinary.com/remind-cents-cloud/image/upload/v1706681596/cxsweghwncdfdtwddcdl.png"
                                   alt=""
                                 />
-                              </Link>
+                              </button>
                             </td>
                           </tr>
                         ))}

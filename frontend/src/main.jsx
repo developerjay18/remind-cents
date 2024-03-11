@@ -36,7 +36,7 @@ const router = createBrowserRouter(
       <Route path="/lendings/edit/:id" element={<EditLending />} />
       <Route path="/borrowings" element={<Borrowings />} />
       <Route path="/borrowings/add" element={<AddBorrowing />} />
-      <Route path="/borrowings/edit" element={<EditBorrowing />} />
+      <Route path="/borrowings/edit/:id" element={<EditBorrowing />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/reset-password" element={<ResetPassword />} />
     </Route>
